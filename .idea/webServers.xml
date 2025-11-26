@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="75d76579-ecf2-4a76-815d-4c9752ca023c" name="集群">
+        <fileTransfer accessType="SFTP" host="10.1.19.62" port="20008" sshConfigId="4797b164-8894-4358-8037-a7b38d9276b8" sshConfig="crc00006699@10.1.19.62:20008 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

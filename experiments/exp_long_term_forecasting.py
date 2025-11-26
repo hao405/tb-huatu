@@ -12,6 +12,7 @@ import time
 import warnings
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader
+from utils.tools import EarlyStopping, adjust_learning_rate, visual, visualize_c_est
 
 warnings.filterwarnings('ignore')
 
@@ -99,6 +100,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         if not os.path.exists(path):
             os.makedirs(path)
 
+        # === 新增：定义训练可视化保存路径 ===
+        vis_train_path = os.path.join(path, 'vis_train')
+        # =================================
+
         time_now = time.time()
         train_steps = len(train_loader)
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
@@ -156,6 +161,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     batch_x, x_mark_input, dec_inp, y_mark_input,
                     y_enc=batch_y, is_train=True, is_out_u=True, c_est=None
                 )
+
+                # === [接口调用] Phase 1: 可视化训练过程中的 c_est 状态 ===
+                if i == 0:
+                    visualize_c_est(batch_x, U, vis_train_path, epoch + 1, "Phase1_PreTrain")
+                # =============================================================
 
                 # 收集数据用于 Phase 2 (注意：这里收集原始的 batch_x_mark，因为 TensorDataset 不支持 None)
                 if epoch == self.args.pre_epoches - 1 or early_stopping.counter == self.args.patience - 1:
@@ -249,11 +259,17 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 f_dim = -1 if self.args.features == 'MS' else 0
                 batch_y_target = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
 
-                # 使用处理后的 x_mark_input 和 y_mark_input
-                outputs, x_rec, other_loss, _ = self.model(
+                # Phase 2: c_est is passed in (batch_u)
+                # [关键修改] 这里将 _ 改为 c_est_out，以便捕获输出并绘图
+                outputs, x_rec, other_loss, c_est_out = self.model(
                     batch_x, x_mark_input, dec_inp, y_mark_input,
                     y_enc=batch_y, is_train=True, is_out_u=True, c_est=batch_u
                 )
+
+                # === [接口调用] Phase 2: 可视化训练过程中的 c_est 状态 ===
+                if i == 0:
+                    visualize_c_est(batch_x, c_est_out, vis_train_path, epoch + 1, "Phase2_FineTune")
+                # =============================================================
 
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]
 

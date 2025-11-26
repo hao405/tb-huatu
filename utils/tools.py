@@ -118,3 +118,63 @@ def adjustment(gt, pred):
 
 def cal_accuracy(y_pred, y_true):
     return np.mean(y_pred == y_true)
+
+
+# 该文件路径: utils/tools.py
+# 请将此函数添加到文件末尾
+
+def visualize_c_est(input_data, c_est_data, save_dir, epoch, phase_name, feature_dim=0):
+    """
+    接口函数：绘制输入特征与 c_est 状态的对比图。
+
+    参数:
+        input_data: 输入序列 (Tensor), shape [Batch, Seq, Feat]
+        c_est_data: 状态序列 (Tensor), shape [Batch, Seq]
+        save_dir: 图片保存文件夹路径
+        epoch: 当前的 Epoch 数
+        phase_name: 阶段名称 (用于文件名)
+        feature_dim: 要可视化的特征维度索引 (默认 0)
+    """
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    # 1. 数据预处理：取 Batch 中的第 0 个样本，并转为 numpy
+    # 如果已经是 numpy 则不转换，如果是 Tensor 则 detach 并转 cpu
+    if isinstance(input_data, torch.Tensor):
+        inp = input_data[0].detach().cpu().numpy()
+    else:
+        inp = input_data[0]
+
+    if isinstance(c_est_data, torch.Tensor):
+        est = c_est_data[0].detach().cpu().numpy()
+    else:
+        est = c_est_data[0]
+
+    seq_len = inp.shape[0]
+
+    # 2. 绘图
+    fig, ax1 = plt.subplots(figsize=(12, 5))
+
+    # 左轴：输入特征
+    color1 = 'tab:blue'
+    ax1.set_xlabel('Time Step')
+    ax1.set_ylabel(f'Input Feature (Dim {feature_dim})', color=color1)
+    ax1.plot(inp[:, feature_dim], color=color1, label='Input Feature', linewidth=1)
+    ax1.tick_params(axis='y', labelcolor=color1)
+    ax1.grid(True, linestyle='--', alpha=0.3)
+
+    # 右轴：c_est 状态 (使用阶梯图 step)
+    ax2 = ax1.twinx()
+    color2 = 'tab:red'
+    ax2.set_ylabel('c_est (Discrete State)', color=color2)
+    ax2.step(range(seq_len), est, color=color2, where='mid', label='c_est', linewidth=1.5)
+    ax2.tick_params(axis='y', labelcolor=color2)
+
+    plt.title(f'Training Visualization - {phase_name} - Epoch {epoch}')
+    plt.tight_layout()
+
+    # 3. 保存
+    file_name = f"{phase_name}_Epoch{epoch}.png"
+    plt.savefig(os.path.join(save_dir, file_name))
+    plt.close()
+    # print(f"Saved visualization to {os.path.join(save_dir, file_name)}")

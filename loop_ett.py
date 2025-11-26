@@ -20,7 +20,6 @@ ca=0
 ia=2
 n_head=16
 alpha=0.329616726
-
 enc_in=7
 
 # 定义要搜索的参数网格
@@ -64,7 +63,7 @@ for batch_size,lr,ca_layers,pd_layers,ia_layers,seed in param_combinations:
         "--patience", "10",
         "--itr", "1",
         "--n_heads",f"{n_head}",
-        "--seed", str(seed)
+        "--seed", str(seed),
     ]
 
     # 执行命令并实时输出
