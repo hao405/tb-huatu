@@ -726,8 +726,8 @@ class Model(nn.Module):
         #print(torch.cat([zc_rec_mean.permute(0, 2, 1), zc_pred_mean.permute(0, 2, 1)], dim=2).permute(0, 2, 1).shape)
 
         # dec_out = self.final_mlp(dec_out)
-        # x = dec_out_x * std + mean
-        x = self.final_mlp_x(dec_out_x)
+        # x = self.final_mlp_x(dec_out_x)
+        x = dec_out_x * std + mean
         y = dec_out * std + mean
 
 
@@ -748,8 +748,8 @@ class Model(nn.Module):
             zd_kl_loss = self.encoder_zd.kl_loss(torch.cat([zd_rec_mean, zd_pred_mean], dim=1),
                                                  torch.cat([zd_rec_std, zd_pred_std], dim=1),
                                                  torch.cat([zd_rec, zd_pred], dim=1), embeddings)
-            other_loss = zc_kl_loss * self.configs.zc_kl_weight + zd_kl_loss * self.configs.zd_kl_weight + hmm_loss * self.configs.hmm_weight
-            # print("zc_kl_loss:", zc_kl_loss.item(), "zd_kl_loss:", zd_kl_loss.item(), "hmm_loss:", hmm_loss.item(), "other_loss:", other_loss.item())
+            other_loss +=  hmm_loss * self.configs.hmm_weight
+            other_loss += zc_kl_loss * self.configs.zc_kl_weight + zd_kl_loss * self.configs.zd_kl_weight
             if is_out_u:
                 return y, x, other_loss, c_est
         return y, x, other_loss

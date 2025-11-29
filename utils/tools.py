@@ -167,7 +167,8 @@ def visualize_c_est(input_data, c_est_data, save_dir, epoch, phase_name, feature
     ax2 = ax1.twinx()
     color2 = 'tab:red'
     ax2.set_ylabel('c_est (Discrete State)', color=color2)
-    ax2.step(range(seq_len), est, color=color2, where='mid', label='c_est', linewidth=1.5)
+    x_axis = np.arange(len(est))
+    ax2.step(x_axis, est, color=color2, where='mid', label='c_est', linewidth=1.5)
     ax2.tick_params(axis='y', labelcolor=color2)
 
     plt.title(f'Training Visualization - {phase_name} - Epoch {epoch}')

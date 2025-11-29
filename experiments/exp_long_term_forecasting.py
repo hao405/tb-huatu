@@ -101,7 +101,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             os.makedirs(path)
 
         # === 新增：定义训练可视化保存路径 ===
-        vis_train_path = os.path.join(path, 'vis_train')
+        vis_train_path = os.path.join(path, 'vis_3')
         # =================================
 
         time_now = time.time()
@@ -184,7 +184,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
                 train_loss.append(loss.item())
 
-                if (i + 1) % 100 == 0:
+                if (i + 1) % 1 == 0:
                     print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * ((self.args.train_epochs - epoch) * train_steps - i)
@@ -275,11 +275,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
                 loss = self.time_freq_mae(batch_y_target, outputs)
                 loss += other_loss
-                loss += self.time_freq_mae(batch_x, x_rec) * self.args.rec_weight
+                rec_loss = self.time_freq_mae(batch_x, x_rec) * self.args.rec_weight
+                loss += rec_loss
 
                 train_loss.append(loss.item())
 
-                if (i + 1) % 100 == 0:
+                if (i + 1) % 1 == 0:
                     print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * ((self.args.train_epochs - epoch) * train_steps - i)

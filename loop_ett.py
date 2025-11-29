@@ -3,9 +3,10 @@ import os
 from itertools import product
 
 # 设置环境变量（指定GPU）
-os.environ["HIP_VISIBLE_DEVICES"] = "4"
-os.environ["MIOPEN_DISABLE_CACHE"] = "1"
-os.environ["MIOPEN_SYSTEM_DB_PATH"] = ""
+# os.environ["HIP_VISIBLE_DEVICES"] = "4"
+# os.environ["MIOPEN_DISABLE_CACHE"] = "1"
+# os.environ["MIOPEN_SYSTEM_DB_PATH"] = ""
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"  # 只暴露 GPU 0/1/2
 
 # 配置基础参数
 model_name = "TimeBridge"
@@ -13,13 +14,13 @@ data_name = "ETTh1"
 root='./data' # 数据集根路径
 data_path = 'ETT-small' # 可选[ETT-small，electricity，exchange_rate，illness，traffic，weather]
 seq_len=96
-pred_len=192 #36 48 60
-lr=0.000366033
-bs=32
+pred_len=96 #36 48 60
+lr=0.000348538
+bs=16
 ca=0
 ia=2
-n_head=16
-alpha=0.329616726
+n_head=8
+alpha=0.383301731
 enc_in=7
 
 # 定义要搜索的参数网格
@@ -28,7 +29,7 @@ learning_rates = [lr]
 ca_layers = [ca]  # 长期
 pd_layers = [1]
 ia_layers = [ia]  # 短期
-seed=list(range(2023,2025))
+seed=[2023]
 # 生成所有参数组合
 param_combinations = product(batch_sizes, learning_rates,ca_layers,pd_layers,ia_layers,seed)
 
@@ -64,6 +65,7 @@ for batch_size,lr,ca_layers,pd_layers,ia_layers,seed in param_combinations:
         "--itr", "1",
         "--n_heads",f"{n_head}",
         "--seed", str(seed),
+        "--gpu", "1"
     ]
 
     # 执行命令并实时输出
